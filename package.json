@@ -1,0 +1,16 @@
+{
+  "name": "valid8r",
+  "version": "0.0.0",
+  "description": "Factory for creating validator object",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test-dev": "jest --watchAll"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^24.8.0"
+  }
+}
