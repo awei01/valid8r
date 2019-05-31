@@ -1,7 +1,7 @@
 {
   "name": "valid8r",
   "version": "0.0.0",
-  "description": "Factory for creating validator object",
+  "description": "Validate fields on an object with your own validation async/sync functions",
   "main": "index.js",
   "scripts": {
     "test": "jest",
