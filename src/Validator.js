@@ -14,7 +14,7 @@ module.exports = function (schema, messages) {
   }, {})
 
   function _resolveMessage (ruleName) {
-    return messages
+    return ruleName && messages
       ? messages[ruleName] || messages.default || ruleName
       : ruleName
   }

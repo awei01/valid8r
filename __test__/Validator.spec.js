@@ -173,6 +173,18 @@ describe('Validator:', () => {
   })
 
   describe('when created with [schema, object of messges]', () => {
+    test('validateAll() with [valid data] when messages.default defined resolves with [null]', () => {
+      const validator = Validator({
+        foo: { rule1: jest.fn().mockReturnValue(true) },
+        bar: { rule2: jest.fn().mockReturnValue(true) }
+      }, {
+        default: 'some default'
+      })
+      return validator.validateAll({ foo: 'value', bar: 'value' })
+        .then((result) => {
+          expect(result).toBe(null)
+        })
+    })
     test('validateField() with [invalid data] resolves with [rule message]', () => {
       const validator = Validator({
         foo: { rule1: jest.fn() }
