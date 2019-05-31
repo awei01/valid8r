@@ -105,6 +105,16 @@ describe('Validator:', () => {
       }).toThrow('Field [bar] not in schema')
     })
 
+    test('when called with [true, key not in schema, data] resolves with null', () => {
+      const validator = Validator({
+        foo: { isRequired: true }
+      })
+      validator.validateField(true, 'bar', {})
+        .then((result) => {
+          expect(result).toBe(null)
+        })
+    })
+
     test('when called with [key, falsey], it does not throw', () => {
       const validator = Validator({
         foo: { isRequired: true }

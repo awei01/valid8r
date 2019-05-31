@@ -19,11 +19,25 @@ module.exports = function (schema, messages) {
       : ruleName
   }
 
-  function validateField (field, data) {
+  function hasField (field) {
+
+  }
+
+  function validateField (suppressMissingFieldError, field, data) {
+    if (suppressMissingFieldError !== true) {
+      data = field
+      field = suppressMissingFieldError
+      suppressMissingFieldError = false
+    }
     data = data || {}
     const value = data[field]
     const validateFn = validators[field]
-    if (!validateFn) { throw new Error(`Field [${field}] not in schema`) }
+    if (!validateFn) {
+      if (suppressMissingFieldError) {
+        return Promise.resolve(null)
+      }
+      throw new Error(`Field [${field}] not in schema`)
+    }
     return validateFn(value, data)
       .then(_resolveMessage)
   }
@@ -48,6 +62,7 @@ module.exports = function (schema, messages) {
   }
 
   return {
+    hasField,
     validateField,
     validateAll,
     get requiredFields () {
