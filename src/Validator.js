@@ -19,10 +19,6 @@ module.exports = function (schema, messages) {
       : ruleName
   }
 
-  function hasField (field) {
-
-  }
-
   function validateField (suppressMissingFieldError, field, data) {
     if (suppressMissingFieldError !== true) {
       data = field
@@ -62,7 +58,6 @@ module.exports = function (schema, messages) {
   }
 
   return {
-    hasField,
     validateField,
     validateAll,
     get requiredFields () {
