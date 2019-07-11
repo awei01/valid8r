@@ -232,4 +232,54 @@ describe('Validator:', () => {
       }).toThrow('Invalid messages')
     })
   })
+
+  describe('.extend()', () => {
+    test('called with [rules] can add rules', () => {
+      let validator = Validator({ foo: { isRequired: true } })
+      validator = validator.extend({ bar: { isRequired: true } })
+      return validator.validateAll({ foo: true })
+        .then((result) => {
+          expect(result).toEqual({ bar: 'isRequired' })
+        })
+    })
+    test('called with [rules] can replace rules', () => {
+      const rule1 = jest.fn()
+      let validator = Validator({ foo: { rule1 } })
+      const rule2 = jest.fn().mockReturnValue(false)
+      validator = validator.extend({ foo: { rule2 } })
+      return validator.validateAll({ foo: 'value' })
+        .then((result) => {
+          expect(rule1).not.toHaveBeenCalled()
+          expect(rule2).toHaveBeenCalledWith('value', { foo: 'value' })
+          expect(result).toEqual({ foo: 'rule2' })
+        })
+    })
+    test('called with [rules] can remove rules', () => {
+      const rule1 = jest.fn()
+      let validator = Validator({ foo: { rule1 }, bar: { isRequired: true } })
+      const rule2 = jest.fn().mockReturnValue(false)
+      validator = validator.extend({ foo: null })
+      return validator.validateAll({ bar: 'value' })
+        .then((result) => {
+          expect(rule1).not.toHaveBeenCalled()
+          expect(result).toBe(null)
+        })
+    })
+    test('called with [{}, messages] can override messages', () => {
+      let validator = Validator({ foo: { isRequired: true } })
+      validator = validator.extend({}, { isRequired: 'required' })
+      return validator.validateAll({})
+        .then((result) => {
+          expect(result).toEqual({ foo: 'required' })
+        })
+    })
+    test('called with [{}, messages] can remove messages', () => {
+      let validator = Validator({ foo: { isRequired: true } }, { isRequired: 'required'} )
+      validator = validator.extend({}, { isRequired: null })
+      return validator.validateAll({})
+        .then((result) => {
+          expect(result).toEqual({ foo: 'isRequired' })
+        })
+    })
+ })
 })

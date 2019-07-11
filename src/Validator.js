@@ -1,4 +1,4 @@
-module.exports = function (schema, messages) {
+module.exports = function Validator (schema, messages) {
   const keys = schema && Object.keys(schema)
   if (!keys || !keys.length) {
     throw new Error('Invalid schema')
@@ -57,9 +57,18 @@ module.exports = function (schema, messages) {
       })
   }
 
+  function extend (newSchema, newMessages) {
+    if (!newSchema || typeof newSchema !== 'object') { throw new Error('Invalid schema argument') }
+    newMessages = newMessages || {}
+    const resolvedSchema = _filterEmptyKeys({ ...schema, ...newSchema })
+    const resolvedMessages = { ...messages, ...newMessages }
+    return Validator(resolvedSchema, resolvedMessages)
+  }
+
   return {
     validateField,
     validateAll,
+    extend,
     get requiredFields () {
       return Object.keys(schema).reduce((result, field) => {
         if (schema[field].isRequired) {
@@ -89,4 +98,13 @@ function FieldValidator (fieldSchema) {
       })
     }, Promise.resolve(null))
   }
+}
+
+function _filterEmptyKeys (object) {
+  return Object.keys(object).reduce((result, key) => {
+    if (object[key]) {
+      result[key] = object[key]
+    }
+    return result
+  }, {})
 }
