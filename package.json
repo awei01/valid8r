@@ -1,6 +1,6 @@
 {
   "name": "valid8r",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Validate fields on an object with your own validation async/sync functions",
   "main": "index.js",
   "scripts": {
