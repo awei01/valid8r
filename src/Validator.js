@@ -21,24 +21,35 @@ module.exports = function Validator (schema, messages) {
       : ruleName
   }
 
-  function validateField (suppressMissingFieldError, field, data) {
-    if (suppressMissingFieldError !== true) {
-      data = field
-      field = suppressMissingFieldError
-      suppressMissingFieldError = false
-    }
+  function validateField (field, data) {
     data = data || {}
     const value = data[field]
     const validateFn = validators[field]
     if (!validateFn) {
-      if (suppressMissingFieldError) {
-        return Promise.resolve(null)
-      }
-      throw new Error(`Field [${field}] not in schema`)
+      console.warn(`Field [${field}] not in validation schema`)
+      return Promise.resolve(null)
     }
     return validateFn(value, data)
       .then(_resolveMessage)
   }
+  // function validateField (suppressMissingFieldError, field, data) {
+  //   if (suppressMissingFieldError !== true) {
+  //     data = field
+  //     field = suppressMissingFieldError
+  //     suppressMissingFieldError = false
+  //   }
+  //   data = data || {}
+  //   const value = data[field]
+  //   const validateFn = validators[field]
+  //   if (!validateFn) {
+  //     if (suppressMissingFieldError) {
+  //       return Promise.resolve(null)
+  //     }
+  //     throw new Error(`Field [${field}] not in schema`)
+  //   }
+  //   return validateFn(value, data)
+  //     .then(_resolveMessage)
+  // }
 
   function validateAll (fields, data) {
     if (!Array.isArray(fields)) {

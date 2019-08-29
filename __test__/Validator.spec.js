@@ -107,24 +107,24 @@ describe('Validator:', () => {
         })
     })
 
-    test('when called with [key not in schema, data] throws', () => {
-      const validator = Validator({
-        foo: { isRequired: true }
-      })
-      expect(() => {
-        validator.validateField('bar', {})
-      }).toThrow('Field [bar] not in schema')
-    })
+    // test('when called with [key not in schema, data] throws', () => {
+    //   const validator = Validator({
+    //     foo: { isRequired: true }
+    //   })
+    //   expect(() => {
+    //     validator.validateField('bar', {})
+    //   }).toThrow('Field [bar] not in schema')
+    // })
 
-    test('when called with [true, key not in schema, data] resolves with null', () => {
-      const validator = Validator({
-        foo: { isRequired: true }
-      })
-      validator.validateField(true, 'bar', {})
-        .then((result) => {
-          expect(result).toBe(null)
-        })
-    })
+    // test('when called with [true, key not in schema, data] resolves with null', () => {
+    //   const validator = Validator({
+    //     foo: { isRequired: true }
+    //   })
+    //   validator.validateField(true, 'bar', {})
+    //     .then((result) => {
+    //       expect(result).toBe(null)
+    //     })
+    // })
 
     test('when called with [key, falsey], it does not throw', () => {
       const validator = Validator({
