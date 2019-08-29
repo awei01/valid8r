@@ -3,13 +3,15 @@ module.exports = function Validator (schema, messages) {
   if (!keys || !keys.length) {
     throw new Error('Invalid schema')
   }
-  if (typeof messages !== 'undefined' && messages !== null && typeof messages !== 'object') {
+  messages = messages || {}
+  if (!messages || typeof messages !== 'object' || Array.isArray(messages)) {
     throw new Error('Invalid messages')
   }
 
   const validators = keys.reduce((result, field) => {
-    const fieldSchema = schema[field]
-    result[field] = FieldValidator(fieldSchema)
+    const fieldSchema = FieldValidator(schema[field])
+    if (!fieldSchema) { throw new Error(`Invalid rules for field [${field}]`) }
+    result[field] = fieldSchema
     return result
   }, {})
 
@@ -57,12 +59,12 @@ module.exports = function Validator (schema, messages) {
       })
   }
 
-  function extend (newSchema, newMessages) {
-    if (!newSchema || typeof newSchema !== 'object') { throw new Error('Invalid schema argument') }
-    newMessages = newMessages || {}
-    const resolvedSchema = _filterEmptyKeys({ ...schema, ...newSchema })
-    const resolvedMessages = { ...messages, ...newMessages }
-    return Validator(resolvedSchema, resolvedMessages)
+  function extend (schemaFn, messagesFn) {
+    if (schemaFn && typeof schemaFn !== 'function') { throw new Error('Cannot extend schema without function') }
+    if (messagesFn && typeof messagesFn !== 'function') { throw new Error('Cannot extend messages without function') }
+    const newSchema = schemaFn ? schemaFn(schema) : schema
+    const newMessages = messagesFn ? messagesFn(messages) : messages
+    return Validator(newSchema, messages)
   }
 
   return {
@@ -81,6 +83,7 @@ module.exports = function Validator (schema, messages) {
 }
 
 function FieldValidator (fieldSchema) {
+  if (!fieldSchema || Array.isArray(fieldSchema) || typeof fieldSchema !== 'object' || !Object.keys(fieldSchema).length) { return }
   const { isRequired, ...rules } = fieldSchema
   return function (...args) {
     const [value] = args

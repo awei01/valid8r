@@ -16,6 +16,17 @@ describe('Validator:', () => {
         Validator({})
       }).toThrow('Invalid schema')
     })
+    test('throws error w/ invalid field schema', () => {
+      expect(() => {
+        Validator({ foo: null })
+      }).toThrow('Invalid rules for field [foo]')
+      expect(() => {
+        Validator({ foo: [] })
+      }).toThrow('Invalid rules for field [foo]')
+      expect(() => {
+        Validator({ foo: {} })
+      }).toThrow('Invalid rules for field [foo]')
+    })
   })
 
   describe('.validateField()', () => {
@@ -226,60 +237,52 @@ describe('Validator:', () => {
           expect(result).toBe('rule1')
         })
     })
-    test('constructed with invalid rules, throws', () => {
+    test('constructed with invalid messages, throws', () => {
       expect(() => {
         Validator({ foo: { isRequired: true } }, 1)
+      }).toThrow('Invalid messages')
+      expect(() => {
+        Validator({ foo: { isRequired: true } }, [])
       }).toThrow('Invalid messages')
     })
   })
 
   describe('.extend()', () => {
-    test('called with [rules] can add rules', () => {
+    test('called with [schemaFn] can add fields and rules', () => {
       let validator = Validator({ foo: { isRequired: true } })
-      validator = validator.extend({ bar: { isRequired: true } })
-      return validator.validateAll({ foo: true })
+      const rule1 = jest.fn().mockReturnValue(false)
+      validator = validator.extend((rules) => {
+        rules.foo.rule1 = rule1
+        rules.bar = { isRequired: true }
+        return rules
+      })
+      return validator.validateAll({ foo: 'foo' })
         .then((result) => {
-          expect(result).toEqual({ bar: 'isRequired' })
+          expect(rule1).toHaveBeenCalledWith('foo', { foo: 'foo' })
+          expect(result).toEqual({ foo: 'rule1', bar: 'isRequired' })
         })
     })
-    test('called with [rules] can replace rules', () => {
-      const rule1 = jest.fn()
-      let validator = Validator({ foo: { rule1 } })
-      const rule2 = jest.fn().mockReturnValue(false)
-      validator = validator.extend({ foo: { rule2 } })
-      return validator.validateAll({ foo: 'value' })
-        .then((result) => {
-          expect(rule1).not.toHaveBeenCalled()
-          expect(rule2).toHaveBeenCalledWith('value', { foo: 'value' })
-          expect(result).toEqual({ foo: 'rule2' })
-        })
-    })
-    test('called with [rules] can remove rules', () => {
-      const rule1 = jest.fn()
-      let validator = Validator({ foo: { rule1 }, bar: { isRequired: true } })
-      const rule2 = jest.fn().mockReturnValue(false)
-      validator = validator.extend({ foo: null })
-      return validator.validateAll({ bar: 'value' })
-        .then((result) => {
-          expect(rule1).not.toHaveBeenCalled()
-          expect(result).toBe(null)
-        })
-    })
-    test('called with [{}, messages] can override messages', () => {
+    test('called with [null, messagesFn] can override messages', () => {
       let validator = Validator({ foo: { isRequired: true } })
-      validator = validator.extend({}, { isRequired: 'required' })
+      validator = validator.extend(null, (rules) => {
+        rules.isRequired = 'required'
+        return rules
+      })
       return validator.validateAll({})
         .then((result) => {
           expect(result).toEqual({ foo: 'required' })
         })
     })
-    test('called with [{}, messages] can remove messages', () => {
-      let validator = Validator({ foo: { isRequired: true } }, { isRequired: 'required'} )
-      validator = validator.extend({}, { isRequired: null })
-      return validator.validateAll({})
-        .then((result) => {
-          expect(result).toEqual({ foo: 'isRequired' })
-        })
+    test('called with [nonFn] or [null, nonFn] throws', () => {
+      const validator = Validator({ foo: { isRequired: true } })
+      expect(() => {
+        validator.extend('invalid')
+      }).toThrow('Cannot extend schema without function')
+      expect(() => {
+        validator.extend((rules) => {
+          rules.foo.rule1 = jest.fn()
+        }, 'invalid')
+      }).toThrow('Cannot extend messages without function')
     })
- })
+  })
 })
